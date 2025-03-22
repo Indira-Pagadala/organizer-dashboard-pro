@@ -1,89 +1,93 @@
 
-import { BarChart3, Calendar, UserCheck, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Calendar, DollarSign, Star, Tag, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { Progress } from "@/components/ui/progress";
 
 interface OrganizerCardProps {
   id: string;
   name: string;
   email: string;
-  eventsCount: number;
-  totalAttendees: number;
-  totalRevenue: number;
+  organization: string;
+  category: string;
   commissionRate: number;
   commissionAmount: number;
-  avatar?: string;
+  totalRevenue: number;
+  eventsCount: number;
+  verified?: boolean;
+  logo?: string;
 }
 
 const OrganizerCard = ({
   id,
   name,
   email,
-  eventsCount,
-  totalAttendees,
-  totalRevenue,
+  organization,
+  category,
   commissionRate,
   commissionAmount,
-  avatar
+  totalRevenue,
+  eventsCount,
+  verified = false,
+  logo,
 }: OrganizerCardProps) => {
-  const initials = name
-    .split(' ')
-    .map(part => part[0])
-    .join('')
-    .toUpperCase();
-
   return (
-    <Card className="overflow-hidden transition-all duration-300 hover:shadow-md">
+    <Card className="card-hover overflow-hidden">
       <CardHeader className="pb-2">
-        <div className="flex items-center gap-4">
-          <Avatar className="h-12 w-12">
-            <AvatarImage src={avatar} alt={name} />
-            <AvatarFallback>{initials}</AvatarFallback>
-          </Avatar>
-          <div>
-            <CardTitle className="text-lg">{name}</CardTitle>
-            <CardDescription>{email}</CardDescription>
+        <div className="flex justify-between items-start">
+          <div className="flex items-center gap-2">
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary overflow-hidden">
+              {logo ? (
+                <img src={logo} alt={name} className="h-full w-full object-cover" />
+              ) : (
+                <User className="h-5 w-5" />
+              )}
+            </div>
+            <div>
+              <CardTitle className="text-xl">{name}</CardTitle>
+              <CardDescription className="text-sm mt-1">{email}</CardDescription>
+            </div>
           </div>
+          {verified && (
+            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+              <Star className="h-3 w-3 mr-1 fill-green-500 text-green-500" />
+              Verified
+            </Badge>
+          )}
         </div>
       </CardHeader>
-      <CardContent className="pb-3 grid grid-cols-2 gap-4">
-        <div className="flex flex-col">
-          <span className="text-sm text-muted-foreground flex items-center gap-1">
-            <Calendar className="h-3.5 w-3.5" /> Events
-          </span>
-          <span className="font-semibold">{eventsCount}</span>
-        </div>
-        <div className="flex flex-col">
-          <span className="text-sm text-muted-foreground flex items-center gap-1">
-            <Users className="h-3.5 w-3.5" /> Attendees
-          </span>
-          <span className="font-semibold">{totalAttendees}</span>
-        </div>
-        <div className="flex flex-col">
-          <span className="text-sm text-muted-foreground flex items-center gap-1">
-            <BarChart3 className="h-3.5 w-3.5" /> Revenue
-          </span>
-          <span className="font-semibold">${totalRevenue.toLocaleString()}</span>
-        </div>
-        <div className="flex flex-col">
-          <span className="text-sm text-muted-foreground flex items-center gap-1">
-            <UserCheck className="h-3.5 w-3.5" /> Commission
-          </span>
-          <span className="font-semibold">${commissionAmount.toLocaleString()}</span>
-        </div>
-        <div className="col-span-2">
-          <div className="flex justify-between text-xs mb-1">
-            <span>Commission Rate</span>
-            <span>{commissionRate}%</span>
+      <CardContent className="pb-2">
+        <p className="text-sm font-medium">{organization}</p>
+        <div className="flex items-center mt-3 gap-4">
+          <div className="flex items-center text-sm text-muted-foreground">
+            <Calendar className="h-4 w-4 mr-1 text-muted-foreground" />
+            {eventsCount} Events
           </div>
-          <Progress value={commissionRate} className="h-2" />
+          <div className="flex items-center text-sm text-muted-foreground">
+            <Tag className="h-4 w-4 mr-1 text-muted-foreground" />
+            {category}
+          </div>
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <div className="bg-muted/50 p-2 rounded-md">
+            <p className="text-xs text-muted-foreground">Commission</p>
+            <p className="text-sm font-medium flex items-center">
+              <DollarSign className="h-3 w-3 mr-1" />
+              {commissionAmount.toLocaleString()}
+            </p>
+          </div>
+          <div className="bg-muted/50 p-2 rounded-md">
+            <p className="text-xs text-muted-foreground">Revenue</p>
+            <p className="text-sm font-medium flex items-center">
+              <DollarSign className="h-3 w-3 mr-1" />
+              {totalRevenue.toLocaleString()}
+            </p>
+          </div>
         </div>
       </CardContent>
-      <CardFooter className="pt-0">
-        <Button asChild variant="outline" className="w-full">
+      <CardFooter className="pt-2">
+        <Button asChild variant="outline" className="w-full" size="sm">
           <Link to={`/organizers/${id}`}>View Details</Link>
         </Button>
       </CardFooter>

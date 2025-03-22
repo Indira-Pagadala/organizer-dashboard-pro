@@ -1,23 +1,29 @@
 
-import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Calendar, Edit, MapPin, Star, Trash, Users } from "lucide-react";
-import { sampleEvents } from "@/data/sampleData";
+import { useParams } from "react-router-dom";
+import { CalendarClock, Globe, MapPin, Users, Tag, Clock, ArrowLeft, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { sampleEvents } from "@/data/sampleData";
+import { Link } from "react-router-dom";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
 
 const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const { toast } = useToast();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   
   const event = sampleEvents.find(event => event.id === id);
@@ -25,259 +31,216 @@ const EventDetail = () => {
   if (!event) {
     return (
       <div className="page-container">
-        <div className="flex flex-col items-center justify-center pt-20">
-          <h1 className="text-2xl font-bold mb-4">Event Not Found</h1>
-          <p className="text-muted-foreground mb-6">The event you're looking for doesn't exist or has been removed.</p>
+        <div className="text-center py-12">
+          <h2 className="text-2xl font-bold mb-4">Event Not Found</h2>
+          <p className="text-muted-foreground mb-6">
+            The event you're looking for doesn't exist or has been removed.
+          </p>
           <Button asChild>
-            <Link to="/events"><ArrowLeft className="mr-2 h-4 w-4" /> Back to Events</Link>
+            <Link to="/events">Back to Events</Link>
           </Button>
         </div>
       </div>
     );
   }
 
-  const attendeeStats = [
-    { label: "Ticket Sales", value: `${event.attendees}/2000` },
-    { label: "Revenue", value: `$${(event.price * event.attendees).toLocaleString()}` },
-    { label: "Avg. Rating", value: event.rating.toFixed(1) },
-    { label: "Ticket Price", value: `$${event.price}` },
-  ];
+  const handleDelete = () => {
+    setDeleteDialogOpen(false);
+    toast({
+      title: "Event deleted",
+      description: `"${event.title}" has been successfully deleted.`,
+    });
+    // In a real app, you would redirect to the events page after deletion
+  };
 
   return (
     <div className="page-container">
-      <div className="mb-8">
-        <div className="flex items-center gap-2 mb-6">
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/events"><ArrowLeft className="mr-1 h-4 w-4" /> Back</Link>
-          </Button>
-          <Badge variant={event.featured ? "default" : "outline"}>
-            {event.featured ? "Featured" : "Regular"}
-          </Badge>
-          <Badge variant="outline">{event.category}</Badge>
-        </div>
-        
-        <div className="flex flex-col md:flex-row justify-between gap-6 items-start">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">{event.title}</h1>
-            <div className="flex flex-col sm:flex-row gap-y-1 gap-x-4 text-muted-foreground">
-              <div className="flex items-center gap-1.5">
-                <Calendar className="h-4 w-4" />
-                <span>{event.date}</span>
+      <div className="flex items-center gap-2 mb-6">
+        <Button variant="outline" size="sm" asChild>
+          <Link to="/events">
+            <ArrowLeft className="h-4 w-4 mr-1" /> Back to Events
+          </Link>
+        </Button>
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          <div className="relative mb-6">
+            <img 
+              src={event.imageUrl}
+              alt={event.title}
+              className="w-full h-[300px] object-cover rounded-lg"
+            />
+            {event.featured && (
+              <Badge className="absolute top-4 right-4 bg-primary/80 hover:bg-primary">
+                Featured
+              </Badge>
+            )}
+          </div>
+          
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-3xl font-bold">{event.title}</h1>
+            <div className="flex gap-2">
+              <Button variant="outline" size="icon">
+                <Edit className="h-4 w-4" />
+              </Button>
+              <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Event</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete this event? This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction 
+                      onClick={handleDelete} 
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="flex flex-col p-4 bg-muted/50 rounded-lg">
+              <div className="flex items-center text-muted-foreground mb-1">
+                <CalendarClock className="h-4 w-4 mr-2" />
+                <span className="text-sm">Date</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <MapPin className="h-4 w-4" />
+              <span className="font-medium">{event.date}</span>
+            </div>
+            <div className="flex flex-col p-4 bg-muted/50 rounded-lg">
+              <div className="flex items-center text-muted-foreground mb-1">
+                <Clock className="h-4 w-4 mr-2" />
+                <span className="text-sm">Time</span>
+              </div>
+              <span className="font-medium">{event.time}</span>
+            </div>
+            <div className="flex flex-col p-4 bg-muted/50 rounded-lg">
+              <div className="flex items-center text-muted-foreground mb-1">
+                <Tag className="h-4 w-4 mr-2" />
+                <span className="text-sm">Category</span>
+              </div>
+              <span className="font-medium">{event.category}</span>
+            </div>
+            <div className="flex flex-col p-4 bg-muted/50 rounded-lg">
+              <div className="flex items-center text-muted-foreground mb-1">
+                <Users className="h-4 w-4 mr-2" />
+                <span className="text-sm">Attendees</span>
+              </div>
+              <span className="font-medium">{event.attendees}</span>
+            </div>
+          </div>
+          
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Event Description</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Join us for the {event.title} event, where participants will enjoy a unique experience in a prime location.
+                This event features world-class speakers, interactive workshops, and exclusive networking opportunities.
+                Don't miss the chance to be part of this amazing event!
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Location</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center mb-4">
+                <MapPin className="h-5 w-5 mr-2 text-muted-foreground" />
                 <span>{event.location}</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Users className="h-4 w-4" />
-                <span>{event.attendees} attendees</span>
-              </div>
-              <div className="flex items-center gap-1.5 text-amber-500">
-                <Star className="h-4 w-4 fill-current" />
-                <span>{event.rating.toFixed(1)}</span>
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="h-9">
-              <Edit className="mr-2 h-4 w-4" /> Edit
-            </Button>
-            <Button variant="destructive" size="sm" className="h-9" onClick={() => setDeleteDialogOpen(true)}>
-              <Trash className="mr-2 h-4 w-4" /> Delete
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="lg:col-span-2">
-          <Card className="overflow-hidden">
-            <div className="relative h-64 sm:h-80 md:h-96 w-full">
-              <img 
-                src={event.image} 
-                alt={event.title} 
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <CardContent className="pt-6">
-              <p className="text-lg mb-4">{event.description}</p>
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="outline">Music</Badge>
-                <Badge variant="outline">Entertainment</Badge>
-                <Badge variant="outline">Live</Badge>
-                <Badge variant="outline">Weekend</Badge>
+              <div className="aspect-video bg-muted rounded-md flex items-center justify-center">
+                <Globe className="h-8 w-8 text-muted-foreground" />
+                <span className="ml-2 text-muted-foreground">Map view would be embedded here</span>
               </div>
             </CardContent>
           </Card>
         </div>
         
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Event Stats</CardTitle>
-              <CardDescription>Key performance metrics</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <dl className="grid grid-cols-2 gap-4">
-                {attendeeStats.map((stat, index) => (
-                  <div key={index} className="bg-muted p-3 rounded-lg">
-                    <dt className="text-sm text-muted-foreground">{stat.label}</dt>
-                    <dd className="text-xl font-semibold mt-1">{stat.value}</dd>
-                  </div>
-                ))}
-              </dl>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Organizer</CardTitle>
-              <CardDescription>Event created by</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="font-semibold text-primary">TE</span>
-                </div>
-                <div>
-                  <div className="font-medium">TechEvents Inc.</div>
-                  <div className="text-sm text-muted-foreground">contact@techevents.com</div>
-                </div>
-              </div>
-              <Button variant="outline" size="sm" className="w-full mt-4" asChild>
-                <Link to="/organizers/1">View Organizer</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      <Tabs defaultValue="details">
-        <TabsList className="w-full md:w-auto">
-          <TabsTrigger value="details">Event Details</TabsTrigger>
-          <TabsTrigger value="attendees">Attendees</TabsTrigger>
-          <TabsTrigger value="tickets">Tickets</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="details" className="mt-6">
-          <Card>
+        <div>
+          <Card className="mb-6">
             <CardHeader>
               <CardTitle>Event Details</CardTitle>
-              <CardDescription>Complete information about the event</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <h3 className="font-semibold mb-2">Description</h3>
-                <p>{event.description}</p>
-                <p className="mt-4">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec, mattis ac neque. Duis vulputate commodo lectus, ac blandit elit tincidunt id. Sed rhoncus, tortor sed eleifend tristique, tortor mauris molestie elit, et lacinia ipsum quam nec dui.
-                </p>
-              </div>
-              
-              <div>
-                <h3 className="font-semibold mb-2">Agenda</h3>
-                <ul className="space-y-2">
-                  <li className="flex gap-4">
-                    <div className="font-medium w-20">9:00 AM</div>
-                    <div>Registration & Breakfast</div>
-                  </li>
-                  <li className="flex gap-4">
-                    <div className="font-medium w-20">10:00 AM</div>
-                    <div>Keynote Speech</div>
-                  </li>
-                  <li className="flex gap-4">
-                    <div className="font-medium w-20">11:30 AM</div>
-                    <div>Panel Discussion</div>
-                  </li>
-                  <li className="flex gap-4">
-                    <div className="font-medium w-20">1:00 PM</div>
-                    <div>Lunch Break</div>
-                  </li>
-                  <li className="flex gap-4">
-                    <div className="font-medium w-20">2:00 PM</div>
-                    <div>Workshops</div>
-                  </li>
-                  <li className="flex gap-4">
-                    <div className="font-medium w-20">5:00 PM</div>
-                    <div>Networking</div>
-                  </li>
-                </ul>
-              </div>
-              
-              <div>
-                <h3 className="font-semibold mb-2">Location</h3>
-                <p>{event.location}</p>
-                <div className="mt-2 h-48 bg-muted rounded-md flex items-center justify-center">
-                  <span className="text-muted-foreground">Map view placeholder</span>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-medium mb-1">Organizer</h3>
+                  <p className="text-muted-foreground">TechConf Inc.</p>
+                </div>
+                <Separator />
+                <div>
+                  <h3 className="font-medium mb-1">Status</h3>
+                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                    Active
+                  </Badge>
+                </div>
+                <Separator />
+                <div>
+                  <h3 className="font-medium mb-1">Price</h3>
+                  <p className="text-muted-foreground">$99 - $299</p>
+                </div>
+                <Separator />
+                <div>
+                  <h3 className="font-medium mb-1">Commission Rate</h3>
+                  <p className="text-muted-foreground">10%</p>
+                </div>
+                <Separator />
+                <div>
+                  <h3 className="font-medium mb-1">Platform Fees</h3>
+                  <p className="text-muted-foreground">$1,500</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-        
-        <TabsContent value="attendees" className="mt-6">
+          
           <Card>
             <CardHeader>
-              <CardTitle>Attendees</CardTitle>
-              <CardDescription>People registered for this event</CardDescription>
+              <CardTitle>Ticket Sales</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-center py-12 text-muted-foreground">
-                Attendee list would be displayed here
-              </p>
+              <div className="space-y-4">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Standard</span>
+                  <span className="font-medium">450</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">VIP</span>
+                  <span className="font-medium">120</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Premium</span>
+                  <span className="font-medium">80</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Early Bird</span>
+                  <span className="font-medium">250</span>
+                </div>
+                <Separator />
+                <div className="flex justify-between font-bold">
+                  <span>Total</span>
+                  <span>{event.attendees}</span>
+                </div>
+              </div>
             </CardContent>
           </Card>
-        </TabsContent>
-        
-        <TabsContent value="tickets" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Tickets</CardTitle>
-              <CardDescription>Ticket types and sales</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-center py-12 text-muted-foreground">
-                Ticket information would be displayed here
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="analytics" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Analytics</CardTitle>
-              <CardDescription>Event performance metrics</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-center py-12 text-muted-foreground">
-                Analytics data would be displayed here
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Event</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this event? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive">
-              <Trash className="mr-2 h-4 w-4" /> Delete Event
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </div>
     </div>
   );
 };

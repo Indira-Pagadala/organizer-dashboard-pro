@@ -1,40 +1,46 @@
 
 import { ReactNode } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
+import { ArrowDown, ArrowUp } from "lucide-react";
 
 interface StatCardProps {
   title: string;
-  value: string | number;
+  value: string;
   icon: ReactNode;
-  description?: string;
+  description: string;
   trend?: number;
-  className?: string;
 }
 
-const StatCard = ({ title, value, icon, description, trend, className }: StatCardProps) => {
+const StatCard = ({ title, value, icon, description, trend }: StatCardProps) => {
+  const isPositive = trend && trend > 0;
+  const isNegative = trend && trend < 0;
+
   return (
-    <Card className={cn("overflow-hidden transition-all duration-200 hover:shadow-md", className)}>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-        <div className="h-9 w-9 rounded-md bg-primary/10 p-2 text-primary">
-          {icon}
+    <Card className="card-hover">
+      <CardContent className="pt-6">
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle className="text-2xl font-bold mb-1">{value}</CardTitle>
+            <CardDescription className="text-base font-medium">{title}</CardDescription>
+            <p className="text-muted-foreground text-sm mt-1">{description}</p>
+          </div>
+          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+            {icon}
+          </div>
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        {(description || trend !== undefined) && (
-          <p className="text-xs text-muted-foreground mt-1">
-            {trend !== undefined && (
-              <span className={cn(
-                "mr-1 font-medium",
-                trend > 0 ? "text-green-500" : "text-red-500"
-              )}>
-                {trend > 0 ? "+" : ""}{trend}%
-              </span>
-            )}
-            {description}
-          </p>
+
+        {trend !== undefined && (
+          <div className="mt-4 flex items-center">
+            <span
+              className={`text-sm font-medium flex items-center ${
+                isPositive ? "text-green-600" : isNegative ? "text-red-600" : "text-muted-foreground"
+              }`}
+            >
+              {isPositive && <ArrowUp className="h-4 w-4 mr-1" />}
+              {isNegative && <ArrowDown className="h-4 w-4 mr-1" />}
+              {trend}% from last month
+            </span>
+          </div>
         )}
       </CardContent>
     </Card>
