@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Search, SlidersHorizontal, Download, UserPlus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label"; // Correct import for Label
 import PageHeader from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -278,23 +279,23 @@ const UsersPage = () => {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
-              <Label>Join Date Range</Label>
+              <Label htmlFor="date-from">Join Date Range</Label>
               <div className="flex gap-2">
-                <Input type="date" placeholder="From" />
-                <Input type="date" placeholder="To" />
+                <Input type="date" id="date-from" placeholder="From" />
+                <Input type="date" id="date-to" placeholder="To" />
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Events Booked</Label>
+              <Label htmlFor="events-min">Events Booked</Label>
               <div className="flex gap-2">
-                <Input type="number" placeholder="Min" />
-                <Input type="number" placeholder="Max" />
+                <Input type="number" id="events-min" placeholder="Min" />
+                <Input type="number" id="events-max" placeholder="Max" />
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Sort By</Label>
+              <Label htmlFor="sort-by">Sort By</Label>
               <Select defaultValue="joinDate">
-                <SelectTrigger>
+                <SelectTrigger id="sort-by">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
